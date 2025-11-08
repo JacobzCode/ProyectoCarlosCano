@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MoodKeeper — Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body id="page-dashboard" data-has-fixed-navbar="true">
+    <div id="dashboardLayout">
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <div class="p-3 sidebar-header d-flex align-items-center">
+          <div>
+            <div class="navbar-brand">MoodKeeper</div>
+            <div class="small">Monitoreo emocional</div>
+          </div>
+        </div>
+        <div class="p-3 text-center">
+          <div class="profile-avatar mb-2" aria-hidden="true"></div>
+          <div id="userHandle" class="fw-bold">-</div>
+        </div>
+        <nav class="nav flex-column p-2">
+          <a class="nav-link" href="index.html">Inicio</a>
+          <a class="nav-link active" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" href="profile.html">Perfil</a>
+          <button id="btnLogout" class="btn btn-outline-secondary m-3">Cerrar sesión</button>
+        </nav>
+      </aside>
+
+      <!-- Main content -->
+      <main id="mainContent" class="w-100">
+        <div class="container-fluid p-4">
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="d-flex align-items-start justify-content-between">
+                <div>
+                  <h3 class="mb-0">Dashboard</h3>
+                  <p class="text-muted mb-0">Visión general de los estados de ánimo</p>
+                </div>
+                <div class="ms-3">
+                  <button class="btn btn-sm btn-outline-secondary back-btn" onclick="history.back()" aria-label="Volver">← Atrás</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart rows: each chart with its controls on the right -->
+          <div class="row mb-3" id="chartsRow">
+            <!-- Avg chart row -->
+            <div class="col-12 mb-3">
+              <div class="card p-3">
+                <div class="row g-3">
+                  <div class="col-lg-9 col-md-8">
+                    <h6 class="mb-2">Promedio por usuario</h6>
+                    <div class="chart-container">
+                      <canvas id="avgChart" class="chart-large"></canvas>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-4 d-flex align-items-center">
+                    <div class="w-100">
+                      <label class="form-label small">Tipo</label>
+                      <select id="chartTypeSelect" class="form-select mb-2">
+                        <option value="bar">Barras</option>
+                        <option value="pie">Circular</option>
+                        <option value="doughnut">Dona</option>
+                        <option value="polarArea">Área polar</option>
+                        <option value="line">Línea</option>
+                        <option value="scatter">Puntos</option>
+                      </select>
+                      <div class="d-grid">
+                        <button id="btnApplyChartType" class="btn btn-primary">Aplicar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hist chart row -->
+            <div class="col-12 mb-3">
+              <div class="card p-3">
+                <div class="row g-3">
+                  <div class="col-lg-9 col-md-8">
+                    <h6 class="mb-2">Distribución</h6>
+                    <div class="chart-container">
+                      <img id="histChartImg" class="img-fluid" src="http://127.0.0.1:8001/api/insights/plot/hist" alt="Distribution" style="max-width: 100%; height: 100%; object-fit: contain;"/>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-4 d-flex align-items-center">
+                    <div class="w-100">
+                      <label class="form-label small">Histograma</label>
+                      <select id="histTypeSelect" class="form-select mb-2">
+                        <option value="hist">Histograma</option>
+                        <option value="pie">Circular</option>
+                        <option value="doughnut">Dona</option>
+                        <option value="scatter">Puntos</option>
+                      </select>
+                      <div class="d-grid">
+                        <button id="btnApplyHistType" class="btn btn-outline-secondary">Actualizar histograma</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerts / recommendations -->
+          <div id="alertsCard" class="mb-3">
+            <div class="alerts-card-header">
+              <div class="d-flex align-items-center justify-content-between">
+                <div><strong>Alertas & Recomendaciones</strong></div>
+                <div><small class="text-muted">Últimas 24h</small></div>
+              </div>
+            </div>
+            <div class="card p-0">
+              <div class="p-3">
+                <div id="alertsSummary" class="mb-2"></div>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0" id="alertsTable">
+                    <thead>
+                      <tr>
+                        <th style="width:48px">#</th>
+                        <th>Usuario</th>
+                        <th style="width:120px">Mood</th>
+                        <th style="width:160px">When</th>
+                        <th>Notas</th>
+                        <th style="width:80px">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="alertsBody"></tbody>
+                  </table>
+                </div>
+                <div id="recommendations" class="mt-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Floating action button to open survey modal -->
+    <button id="openSurveyFab" class="btn btn-primary fab" data-bs-toggle="modal" data-bs-target="#surveyModal" title="Publicar estado">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 1 .632.06l2.4 2.4a.5.5 0 0 1 .06.633l-9.193 9.193a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168L12.853.146z"/></svg>
+    </button>
+
+    <!-- Survey Modal -->
+    <div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="surveyModalLabel">Publicar estado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formSurvey">
+              <div class="mb-3">
+                <label class="form-label">Mood (1-10)</label>
+                <input id="mood" class="form-range" type="range" min="1" max="10" value="5" oninput="document.getElementById('moodVal').innerText=this.value">
+                <div class="mt-2">Actual: <span id="moodVal">5</span></div>
+              </div>
+              <div class="mb-3">
+                <textarea id="comment" class="form-control" placeholder="Notas (opcional)"></textarea>
+              </div>
+              <div class="text-end">
+                <button class="btn btn-primary" id="btnSubmitSurvey" type="submit">Enviar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

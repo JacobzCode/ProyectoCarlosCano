@@ -1,0 +1,2 @@
+id,handle,email,hashed,created
+1,Carlos,carlos@gmail.com,$pbkdf2-sha256$29000$ao2x9n6PsRbCeE.JEYLQGg$t.SyQbE0ZAzqsPxPjge9vkWHdUoii3rVT1xesPbG4YM,2025-10-23T07:13:21.711249

@@ -1,0 +1,405 @@
+/* MoodKeeper custom styles - separate file for a professional look */
+:root{
+  --mk-bg: #f7f7f8;
+  --mk-surface: #ffffff;
+  --mk-muted-1: #efefef;
+  --mk-muted-2: #d1d1d1;
+  --mk-text: #222428;
+  --mk-muted-text: #6b6b6d;
+  --mk-accent: #9e9e9e;
+  --bs-primary: #343a40; /* gris carbón */
+  --bs-secondary: #6c757d;
+  --bs-muted: #adb5bd;
+}
+
+body{ 
+  margin: 0;
+  padding-top: 0; 
+  background: var(--mk-bg); 
+  color: var(--mk-text); 
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+  line-height: 1.6;
+}
+
+/* When navbar is fixed-top, add top-padding to body so content isn't hidden under the bar.
+   Use a data-attribute so pages that need it can opt-in (we set it in templates by default).
+   Adjust value if your navbar height changes. */
+body[data-has-fixed-navbar="true"] { padding-top: 72px; }
+
+html, body { height: 100%; }
+
+/* Navbar Styles */
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Make all navbars use gray tones */
+.mk-navbar, .navbar, .navbar.bg-light, .navbar.bg-white {
+  background: linear-gradient(180deg, #f0f0f0, #e5e5e5) !important;
+  border-bottom: 1px solid var(--mk-muted-2);
+}
+
+.mk-navbar .navbar-brand, .navbar .navbar-brand {
+  color: var(--mk-text) !important;
+}
+
+.mk-navbar .nav-link, .navbar .nav-link {
+  color: var(--bs-secondary) !important;
+  font-weight: 500;
+}
+
+.mk-navbar .nav-link:hover, .navbar .nav-link:hover {
+  color: var(--mk-text) !important;
+}
+
+/* Navbar buttons */
+.mk-navbar .btn, .navbar .btn {
+  background: transparent;
+  color: var(--mk-text);
+  border-color: var(--mk-muted-2);
+}
+
+.mk-navbar .btn-primary, .navbar .btn-primary {
+  background: linear-gradient(135deg,#4f5456,#343a40);
+  color: #fff;
+}
+
+/* Hero Carousel Styles */
+.hero-slide {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #6c757d 0%, #343a40 100%); /* gris medio -> gris carbón */
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #5f6366 0%, #3e4446 100%); /* gris medio-oscuro para contraste */
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #6b6f72 0%, #424547 100%); /* gris medio-oscuro para contraste */
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.text-white-75 {
+  color: rgba(255,255,255,0.85);
+}
+
+.text-light-75 {
+  color: rgba(255,255,255,0.75);
+}
+
+/* Card Styles */
+.card {
+  background: var(--mk-surface);
+  border: 1px solid var(--mk-muted-1);
+  border-radius: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Ensure readable text on dark hero backgrounds */
+.hero-slide h1, .hero-slide .lead, .hero-slide p {
+  color: #ffffff !important;
+}
+
+/* Dark overlay to improve text contrast on gray gradients */
+.hero-slide::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35));
+  z-index: 1;
+}
+.hero-slide > .container{ position: relative; z-index: 2 }
+.hero-slide h1, .hero-slide .lead, .hero-slide p { text-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+
+/* Make card text darker for contrast on light backgrounds */
+.card .card-body, .card h5, .card p, .card .card-text {
+  color: var(--mk-text);
+}
+
+/* Button Styles */
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #495057, #343a40); /* botones en escala de grises */
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(33,33,33,0.08);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(33,33,33,0.12);
+}
+
+.btn-outline-light, .btn-outline-light:hover {
+  color: var(--bs-secondary);
+  border-color: var(--bs-muted);
+  background: transparent;
+}
+
+.btn-outline-secondary {
+  color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+/* Section Spacing */
+section {
+  padding: 80px 0;
+}
+
+/* Background Colors */
+.bg-muted-variant {
+  background-color: var(--mk-accent) !important;
+}
+
+.bg-muted-variant.bg-opacity-10 {
+  background-color: rgba(158,158,158,0.08) !important;
+}
+
+.text-muted-variant {
+  color: var(--mk-accent) !important;
+}
+
+/* Form Styles */
+input.form-control, textarea.form-control {
+  box-shadow: none;
+  border-radius: 12px;
+  border: 2px solid var(--mk-muted-2);
+  background: #fff;
+  padding: 12px 16px;
+  transition: border-color 0.3s ease;
+}
+
+input.form-control:focus, textarea.form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.12rem rgba(52,58,64,0.12);
+}
+
+label.form-label {
+  font-weight: 600;
+  color: var(--mk-muted-text);
+  margin-bottom: 8px;
+}
+
+/* Charts: make them larger and centered */
+.chart-large {
+  width: 100%;
+  height: 420px;
+  display: block;
+  object-fit: contain;
+  background: var(--mk-muted-1);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Survey Visibility */
+.survey-hidden {
+  display: none;
+}
+
+.survey-visible {
+  display: block;
+}
+
+/* Tables */
+/* Alerts table specific styling - boxed table look */
+#alertsCard { border-radius: 12px; overflow: hidden; box-shadow: 0 6px 18px rgba(17,17,19,0.03); }
+.alerts-card-header { background: linear-gradient(90deg,#fafafa,#f1f1f1); padding: 12px 16px; border-bottom: 1px solid var(--mk-muted-2); }
+
+/* Make the table look like a proper boxed table with cell borders */
+#alertsTable { width:100%; border-collapse: separate; border-spacing: 0; font-size:0.95rem; }
+#alertsTable thead th { font-weight:700; font-size:0.9rem; color:var(--mk-text); padding: 12px 14px; text-align:left; background: linear-gradient(180deg,#fbfbfb,#f6f6f6); border-bottom: 2px solid var(--mk-muted-2); }
+#alertsTable tbody td { padding: 10px 14px; vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.04); color: var(--mk-text); }
+
+/* stronger row separators and subtle cells borders */
+#alertsTable tbody tr { background: var(--mk-surface); }
+#alertsTable tbody tr + tr td { border-top: 1px solid rgba(0,0,0,0.04); }
+
+/* zebra striping for clarity */
+#alertsTable tbody tr:nth-child(odd) { background: rgba(0,0,0,0.015); }
+
+.badge-mood { display:inline-flex; align-items:center; padding:6px 10px; border-radius:10px; font-weight:700; background: transparent; border:1px solid rgba(0,0,0,0.06); }
+
+/* Professional alerts table enhancements */
+#alertsTable tbody tr { transition: background 0.12s ease, transform 0.06s ease; }
+#alertsTable tbody tr:hover { background: rgba(52,58,64,0.03); transform: translateY(-1px); }
+.user-cell { display:flex; align-items:center; gap:10px }
+.user-cell .avatar-sm { width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg,#efefef,#e1e1e1); flex-shrink:0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.note-preview { color: var(--mk-muted-text); font-size:0.92rem; max-width:360px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.actions-cell { white-space:nowrap }
+.actions-cell button{ padding:6px 10px; font-size:0.85rem; border-radius:8px }
+
+/* Modal for viewing full alert note */
+.alert-note-modal .modal-body{ white-space:normal; color:var(--mk-text); }
+
+/* Lightweight custom modal (fallback when Bootstrap isn't available) */
+.mk-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:2000 }
+.mk-modal{ background:var(--mk-surface); border-radius:12px; width:calc(100% - 48px); max-width:560px; box-shadow:0 12px 40px rgba(0,0,0,0.28); overflow:hidden }
+.mk-modal .mk-modal-header{ padding:16px 20px; border-bottom:1px solid rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:space-between }
+.mk-modal .mk-modal-body{ padding:18px 20px; color:var(--mk-text); }
+.mk-modal .mk-modal-footer{ padding:12px 16px; border-top:1px solid rgba(0,0,0,0.04); display:flex; gap:8px; justify-content:flex-end }
+.mk-modal .btn{ border-radius:8px }
+.mk-modal-overlay.show{ display:flex }
+
+
+/* Shadows */
+.shadow-sm {
+  box-shadow: 0 4px 18px rgba(17,17,19,0.06);
+}
+
+/* Profile avatar */
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #efefef, #e1e1e1);
+  display: inline-block;
+}
+  /* Use an embedded person icon for avatars (profile and small avatars) */
+  .profile-avatar,
+  .user-cell .avatar-sm {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 52% 52%;
+  }
+  .profile-avatar {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%236b6b6d' d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/></svg>");
+  }
+  .user-cell .avatar-sm {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%236b6b6d' d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/></svg>");
+  }
+
+/* Footer */
+footer {
+  margin-top: auto;
+}
+
+footer a:hover {
+  color: #fff !important;
+  text-decoration: none;
+}
+
+/* Make links neutral gray by default */
+a, a.nav-link {
+  color: var(--bs-secondary);
+}
+
+a:hover, a.nav-link:hover {
+  color: var(--mk-text);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-slide {
+    min-height: 70vh;
+    text-align: center;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem;
+  }
+  
+  section {
+    padding: 60px 0;
+  }
+  
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn-lg {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+}
+
+/* Dashboard sidebar layout */
+#dashboardLayout { min-height: 100vh; }
+
+#dashboardLayout { display:flex; align-items:flex-start; }
+#sidebar {
+  width: 240px;
+  flex: 0 0 240px;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: auto;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 1000;
+  background: linear-gradient(180deg,#f5f5f5,#ececec);
+  padding-top: 6px;
+}
+
+#mainContent { margin-left: 260px; padding-top: 12px; }
+
+@media (max-width: 992px){
+  #sidebar{ position: relative; width:100%; flex: 0 0 auto; }
+  #mainContent{ margin-left:0; }
+}
+
+/* Sidebar internals */
+.sidebar-header{ padding-top:8px; padding-bottom:8px; }
+.sidebar-header .navbar-brand{ margin:0; font-size:1.25rem; }
+.sidebar-header .small{ display:block; color:var(--mk-muted-text); }
+.nav.flex-column .nav-link{ padding: 0.6rem 1rem; color:var(--bs-secondary); }
+.nav.flex-column .nav-link.active{ background: rgba(0,0,0,0.04); font-weight:600; color:var(--mk-text); }
+.nav.flex-column .nav-link:hover{ background: rgba(0,0,0,0.03); color:var(--mk-text); }
+.btn-outline-secondary{ border-color: var(--mk-muted-2); color:var(--mk-text); }
+
+/* Floating action button */
+.fab{
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 1050;
+}
+
+/* Make the icon inside the FAB slightly larger without changing the button size */
+.fab svg { width: 24px; height: 24px; display:block; }
+.fab svg path { transform-origin: center; }

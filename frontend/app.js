@@ -19,16 +19,40 @@ function initHome(){ /* no dynamic handlers yet */ }
 function initRegister(){
   const form = document.getElementById('formRegister')
   if(!form) return
+  
   form.addEventListener('submit', async (e)=>{
     e.preventDefault()
-    const handle = document.getElementById('regHandle').value
-    const email = document.getElementById('regEmail').value
+    
+    const handle = document.getElementById('regHandle').value.trim()
+    const email = document.getElementById('regEmail').value.trim()
     const secret = document.getElementById('regSecret').value
-    const res = await postJson(API_BASE+'/accounts', {handle, email, secret}, false)
-    if(res.status===201){
-      alert('Cuenta creada. Ahora inicia sesión.'); window.location = 'login.html'
-    } else {
-      const j = await res.json(); alert('Error: '+(j.detail||JSON.stringify(j)))
+    
+    // Validación básica
+    if(!handle || !email || !secret){
+      alert('Todos los campos son obligatorios.')
+      return
+    }
+    
+    try {
+      const res = await postJson(API_BASE+'/accounts', {handle, email, secret}, false)
+      console.log('Registration response status:', res.status)
+      
+      if(res.status === 201){
+        // Limpiar el formulario
+        form.reset()
+        
+        // Mostrar mensaje de éxito y redirigir
+        alert('✅ Cuenta creada exitosamente.\n\nSerás redirigido al inicio de sesión.')
+        
+        // Usar replace para evitar que el usuario vuelva atrás al registro
+        window.location.replace('login.html')
+      } else {
+        const j = await res.json()
+        alert('❌ Error al crear la cuenta:\n' + (j.detail || JSON.stringify(j)))
+      }
+    } catch(err) {
+      console.error('Error en registro:', err)
+      alert('❌ Error de conexión.\n\nVerifica que el servidor esté activo en http://127.0.0.1:8001')
     }
   })
 }
@@ -37,15 +61,42 @@ function initRegister(){
 function initLogin(){
   const form = document.getElementById('formLogin')
   if(!form) return
+  
   form.addEventListener('submit', async (e)=>{
     e.preventDefault()
-    const handle = document.getElementById('loginHandle').value
+    
+    const handle = document.getElementById('loginHandle').value.trim()
     const secret = document.getElementById('loginSecret').value
-    const res = await postJson(API_BASE+'/sessions', {handle, secret}, false)
-    if(res.ok){
-      const j = await res.json(); TOKEN = j.access_token; HANDLE = handle; localStorage.setItem('mk_token', TOKEN); localStorage.setItem('mk_handle', HANDLE); window.location='dashboard.html'
-    } else {
-      const j = await res.json(); alert('Login failed: '+(j.detail||JSON.stringify(j)))
+    
+    // Validación básica
+    if(!handle || !secret){
+      alert('Todos los campos son obligatorios.')
+      return
+    }
+    
+    try {
+      const res = await postJson(API_BASE+'/sessions', {handle, secret}, false)
+      console.log('Login response status:', res.status)
+      
+      if(res.ok){
+        const j = await res.json()
+        TOKEN = j.access_token
+        HANDLE = handle
+        localStorage.setItem('mk_token', TOKEN)
+        localStorage.setItem('mk_handle', HANDLE)
+        
+        // Limpiar el formulario
+        form.reset()
+        
+        // Redirigir al dashboard
+        window.location.replace('dashboard.html')
+      } else {
+        const j = await res.json()
+        alert('❌ Error de inicio de sesión:\n' + (j.detail || 'Credenciales inválidas'))
+      }
+    } catch(err) {
+      console.error('Error en login:', err)
+      alert('❌ Error de conexión.\n\nVerifica que el servidor esté activo en http://127.0.0.1:8001')
     }
   })
 }

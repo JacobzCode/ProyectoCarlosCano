@@ -9,10 +9,14 @@ from fastapi import Response
 
 app = FastAPI(title='MoodKeeper', description='Service for mood entries', version='0.1')
 
-# Allow the frontend (served e.g. at http://127.0.0.1:5500) to call the API during development
+# Allow the frontend (served e.g. at http://127.0.0.1:5500 or http://localhost:8000) to call the API during development
 origins = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:5501",
+    "http://localhost:5501",
 ]
 app.add_middleware(
     CORSMiddleware,

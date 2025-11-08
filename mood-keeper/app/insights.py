@@ -65,6 +65,7 @@ def avg_by(handle_col='handle'):
 
 
 def alerts(threshold=3, days=30):
+    """Detecta alertas de riesgo considerando mood y hábitos"""
     df = _load_entries()
     if df is None:
         return {'error': 'pandas required'}
@@ -72,20 +73,62 @@ def alerts(threshold=3, days=30):
         return {'count':0,'items':[]}
     cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
     recent = df[df['created'] >= cutoff]
-    a = recent[recent['mood'] <= threshold]
+    
+    # Detectar riesgo por múltiples factores
+    risk_conditions = (recent['mood'] <= threshold)
+    
+    # Añadir condiciones de hábitos si existen
+    if 'horas_sueno' in recent.columns:
+        # Sueño < 6 horas es factor de riesgo
+        risk_conditions = risk_conditions | (recent['horas_sueno'] < 6)
+    
+    if 'actividad_fisica' in recent.columns:
+        # Actividad física muy baja (< 3) es factor de riesgo
+        risk_conditions = risk_conditions | (recent['actividad_fisica'] < 3)
+    
+    if 'calidad_alimentacion' in recent.columns:
+        # Alimentación muy mala (< 3) es factor de riesgo
+        risk_conditions = risk_conditions | (recent['calidad_alimentacion'] < 3)
+    
+    a = recent[risk_conditions]
     items = []
     for _, row in a.iterrows():
         # include comment/note so frontend can display the full text
         comment = row.get('comment') if 'comment' in row.index else None
         if isinstance(comment, float) and math.isnan(comment):
             comment = None
+        
+        # Calcular score de riesgo (0-100)
+        risk_score = 0
+        if row.get('mood', 5) <= threshold:
+            risk_score += 40
+        if row.get('horas_sueno', 8) < 6:
+            risk_score += 20
+        if row.get('actividad_fisica', 5) < 3:
+            risk_score += 15
+        if row.get('calidad_alimentacion', 5) < 3:
+            risk_score += 15
+        if row.get('nivel_socializacion', 5) < 3:
+            risk_score += 10
+        
         items.append({
             'id': int(row.get('id',0)),
             'handle': row.get('handle'),
             'mood': float(row.get('mood')),
             'created': pd.Timestamp(row.get('created')).isoformat(),
-            'comment': comment or ''
+            'comment': comment or '',
+            'risk_score': min(risk_score, 100),
+            'factors': {
+                'horas_sueno': row.get('horas_sueno'),
+                'actividad_fisica': row.get('actividad_fisica'),
+                'calidad_alimentacion': row.get('calidad_alimentacion'),
+                'nivel_socializacion': row.get('nivel_socializacion')
+            }
         })
+    
+    # Ordenar por risk_score descendente
+    items.sort(key=lambda x: x['risk_score'], reverse=True)
+    
     return {'count': int(a.shape[0]), 'items': items}
 
 

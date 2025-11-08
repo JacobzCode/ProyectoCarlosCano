@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, status, Depends, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Tuple
 from .dto import AccountCreate, SessionCreate, AccountOut, EntryCreate, EntryOut
-from .storage import AccountStore, EntryStore
+from .storage_db import AccountStoreDB, EntryStoreDB
 from .security import hash_secret, verify_secret, make_token, read_token
 from . import insights
 from fastapi import Response
@@ -22,8 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-account_store = AccountStore()
-entry_store = EntryStore()
+account_store = AccountStoreDB()
+entry_store = EntryStoreDB()
 
 
 def _current_user(authorization: str = Header(..., alias='Authorization')) -> Tuple:
@@ -83,15 +83,42 @@ def create_entry(entry: EntryCreate, authorization: str = Header(None, alias='Au
 
     if not (1 <= entry.mood <= 10):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='mood must be 1-10')
-    e = entry_store.create(acct.id, acct.handle, entry.mood, entry.comment)
-    return EntryOut(id=e.id, account_id=e.account_id, handle=e.handle, mood=e.mood, comment=e.comment, created=e.created)
+    
+    # Validar campos de hábitos si están presentes
+    if entry.actividad_fisica is not None and not (0 <= entry.actividad_fisica <= 10):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='actividad_fisica must be 0-10')
+    if entry.calidad_alimentacion is not None and not (0 <= entry.calidad_alimentacion <= 10):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='calidad_alimentacion must be 0-10')
+    if entry.nivel_socializacion is not None and not (0 <= entry.nivel_socializacion <= 10):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='nivel_socializacion must be 0-10')
+    if entry.horas_sueno is not None and not (0 <= entry.horas_sueno <= 24):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='horas_sueno must be 0-24')
+    
+    e = entry_store.create(
+        acct.id, acct.handle, entry.mood, entry.comment,
+        entry.horas_sueno, entry.actividad_fisica,
+        entry.calidad_alimentacion, entry.nivel_socializacion
+    )
+    return EntryOut(
+        id=e.id, account_id=e.account_id, handle=e.handle, 
+        mood=e.mood, comment=e.comment,
+        horas_sueno=e.horas_sueno, actividad_fisica=e.actividad_fisica,
+        calidad_alimentacion=e.calidad_alimentacion, nivel_socializacion=e.nivel_socializacion,
+        created=e.created
+    )
 
 
 @app.get('/api/entries')
 def list_entries():
     items = []
     for e in entry_store.list_all():
-        items.append({'id': e.id, 'account_id': e.account_id, 'handle': e.handle, 'mood': e.mood, 'comment': e.comment, 'created': e.created})
+        items.append({
+            'id': e.id, 'account_id': e.account_id, 'handle': e.handle, 
+            'mood': e.mood, 'comment': e.comment,
+            'horas_sueno': e.horas_sueno, 'actividad_fisica': e.actividad_fisica,
+            'calidad_alimentacion': e.calidad_alimentacion, 'nivel_socializacion': e.nivel_socializacion,
+            'created': e.created
+        })
     return items
 
 
@@ -116,3 +143,106 @@ def insights_plot(plot_name: str, type: str = None):
     if png is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Plot not available')
     return Response(content=png, media_type='image/png')
+
+
+@app.get('/api/resources')
+def get_resources(user_and_token = Depends(_current_user)):
+    """Get personalized resources based on user's recent mood"""
+    user, _ = user_and_token
+    
+    # Get user's recent entries
+    recent_entries = [e for e in entry_store.list_all() if e.handle == user.handle][:10]
+    
+    # Calculate average mood
+    avg_mood = sum(e.mood for e in recent_entries) / len(recent_entries) if recent_entries else 5
+    
+    resources = {
+        'emergency': [
+            {
+                'title': 'Línea de Prevención del Suicidio',
+                'description': 'Disponible 24/7 para apoyo inmediato',
+                'contact': '106',
+                'url': 'https://www.minsalud.gov.co'
+            },
+            {
+                'title': 'Línea Amiga',
+                'description': 'Apoyo psicológico gratuito',
+                'contact': '106',
+                'url': '#'
+            }
+        ],
+        'recommended': []
+    }
+    
+    # Personalized recommendations based on mood
+    if avg_mood <= 4:
+        resources['recommended'].extend([
+            {
+                'title': 'Ejercicios de Respiración',
+                'description': 'Técnicas de respiración para reducir la ansiedad',
+                'type': 'exercise',
+                'url': '#breathing'
+            },
+            {
+                'title': 'Mindfulness para Principiantes',
+                'description': 'Meditaciones guiadas de 5 minutos',
+                'type': 'meditation',
+                'url': '#mindfulness'
+            },
+            {
+                'title': 'Habla con un Profesional',
+                'description': 'Agenda una cita con un psicólogo',
+                'type': 'professional',
+                'url': '#therapy'
+            }
+        ])
+    elif avg_mood <= 7:
+        resources['recommended'].extend([
+            {
+                'title': 'Rutina de Ejercicio',
+                'description': 'Actividades físicas para mejorar el ánimo',
+                'type': 'exercise',
+                'url': '#exercise'
+            },
+            {
+                'title': 'Journaling Emocional',
+                'description': 'Guía para expresar tus emociones por escrito',
+                'type': 'activity',
+                'url': '#journaling'
+            }
+        ])
+    else:
+        resources['recommended'].extend([
+            {
+                'title': 'Mantén tus Hábitos Saludables',
+                'description': 'Consejos para mantener tu bienestar',
+                'type': 'wellness',
+                'url': '#wellness'
+            },
+            {
+                'title': 'Comparte tu Experiencia',
+                'description': 'Ayuda a otros compartiendo lo que te ha funcionado',
+                'type': 'community',
+                'url': '#community'
+            }
+        ])
+    
+    # Add habit-specific recommendations
+    if recent_entries:
+        latest = recent_entries[0]
+        if latest.horas_sueno and latest.horas_sueno < 6:
+            resources['recommended'].insert(0, {
+                'title': 'Mejora tu Higiene del Sueño',
+                'description': 'Técnicas para dormir mejor',
+                'type': 'sleep',
+                'url': '#sleep'
+            })
+        if latest.actividad_fisica and latest.actividad_fisica < 3:
+            resources['recommended'].insert(0, {
+                'title': 'Comienza con Ejercicio Ligero',
+                'description': 'Rutinas de 10 minutos para empezar',
+                'type': 'exercise',
+                'url': '#light-exercise'
+            })
+    
+    return resources

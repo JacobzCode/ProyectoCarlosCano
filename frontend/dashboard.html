@@ -25,6 +25,7 @@
         <nav class="nav flex-column p-2">
           <a class="nav-link" href="index.html">Inicio</a>
           <a class="nav-link active" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" href="resources.html">Recursos</a>
           <a class="nav-link" href="profile.html">Perfil</a>
           <button id="btnLogout" class="btn btn-outline-secondary m-3">Cerrar sesión</button>
         </nav>
@@ -165,6 +166,28 @@
               <div class="mb-3">
                 <textarea id="comment" class="form-control" placeholder="Notas (opcional)"></textarea>
               </div>
+              
+              <!-- Nuevos campos de hábitos -->
+              <div class="mb-3">
+                <label class="form-label">Horas de sueño (opcional)</label>
+                <input id="horas_sueno" class="form-control" type="number" min="0" max="24" step="0.5" placeholder="Ej: 7.5">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Actividad física (0-10, opcional)</label>
+                <input id="actividad_fisica" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('actFisVal').innerText=this.value">
+                <div class="mt-2"><small>0=Ninguna, 10=Intensa</small> | Actual: <span id="actFisVal">5</span></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Calidad de alimentación (0-10, opcional)</label>
+                <input id="calidad_alimentacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('calAlimVal').innerText=this.value">
+                <div class="mt-2"><small>0=Muy mala, 10=Excelente</small> | Actual: <span id="calAlimVal">5</span></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Nivel de socialización (0-10, opcional)</label>
+                <input id="nivel_socializacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('socVal').innerText=this.value">
+                <div class="mt-2"><small>0=Ninguna, 10=Muy social</small> | Actual: <span id="socVal">5</span></div>
+              </div>
+              
               <div class="text-end">
                 <button class="btn btn-primary" id="btnSubmitSurvey" type="submit">Enviar</button>
               </div>

@@ -20,6 +20,11 @@ class AccountOut(BaseModel):
 class EntryCreate(BaseModel):
     mood: int
     comment: Optional[str] = None
+    # Nuevos campos de hábitos
+    horas_sueno: Optional[float] = None
+    actividad_fisica: Optional[int] = None
+    calidad_alimentacion: Optional[int] = None
+    nivel_socializacion: Optional[int] = None
 
 class EntryOut(BaseModel):
     id: int
@@ -27,4 +32,9 @@ class EntryOut(BaseModel):
     handle: str
     mood: int
     comment: Optional[str]
+    # Campos de hábitos
+    horas_sueno: Optional[float] = None
+    actividad_fisica: Optional[int] = None
+    calidad_alimentacion: Optional[int] = None
+    nivel_socializacion: Optional[int] = None
     created: datetime

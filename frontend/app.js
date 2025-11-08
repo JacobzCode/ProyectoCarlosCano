@@ -380,7 +380,24 @@ function initDashboard(){
     e.preventDefault();
     const mood = parseInt(document.getElementById('mood').value);
     const comment = document.getElementById('comment').value;
-  const res = await postJson(API_BASE+'/entries', {mood, comment});
+    
+    // Capturar nuevos campos de hábitos
+    const horas_sueno_val = document.getElementById('horas_sueno').value;
+    const horas_sueno = horas_sueno_val ? parseFloat(horas_sueno_val) : null;
+    const actividad_fisica = parseInt(document.getElementById('actividad_fisica').value);
+    const calidad_alimentacion = parseInt(document.getElementById('calidad_alimentacion').value);
+    const nivel_socializacion = parseInt(document.getElementById('nivel_socializacion').value);
+    
+    const payload = {
+      mood, 
+      comment,
+      horas_sueno,
+      actividad_fisica,
+      calidad_alimentacion,
+      nivel_socializacion
+    };
+    
+    const res = await postJson(API_BASE+'/entries', payload);
     if(res.status===201){
       // close modal if bootstrap is present
       try{ var modalEl = document.getElementById('surveyModal'); var modal = bootstrap.Modal.getInstance(modalEl); if(modal) modal.hide(); }catch(err){}

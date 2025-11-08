@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MoodKeeper — Recursos de Apoyo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+  </head>
+  <body id="page-resources" data-has-fixed-navbar="true">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--mk-gradient);">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">MoodKeeper</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link active" href="resources.html">Recursos</a></li>
+            <li class="nav-item"><a class="nav-link" href="profile.html">Perfil</a></li>
+          </ul>
+          <div id="navAuth" class="d-flex ms-3"></div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-5">
+      <div class="row mb-4">
+        <div class="col-12">
+          <button class="btn btn-sm btn-outline-secondary mb-3" onclick="history.back()">← Atrás</button>
+          <h2 class="mb-2">Recursos de Apoyo</h2>
+          <p class="text-muted">Recursos personalizados según tu estado emocional</p>
+        </div>
+      </div>
+
+      <!-- Emergency Resources -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h5 class="mb-0">🚨 Ayuda Inmediata</h5>
+            </div>
+            <div class="card-body" id="emergencyResources">
+              <p class="text-muted">Cargando recursos de emergencia...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended Resources -->
+      <div class="row">
+        <div class="col-12">
+          <h4 class="mb-3">Recomendaciones Personalizadas</h4>
+          <div id="recommendedResources" class="row g-3">
+            <p class="text-muted">Cargando recomendaciones...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Resources -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <h4 class="mb-3">Recursos Adicionales</h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">📱 Apps Recomendadas</h5>
+                  <ul class="list-unstyled">
+                    <li class="mb-2">• <strong>Headspace:</strong> Meditación guiada</li>
+                    <li class="mb-2">• <strong>Calm:</strong> Relajación y sueño</li>
+                    <li class="mb-2">• <strong>Moodpath:</strong> Seguimiento emocional</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">📚 Lecturas Sugeridas</h5>
+                  <ul class="list-unstyled">
+                    <li class="mb-2">• <strong>El poder del ahora:</strong> Eckhart Tolle</li>
+                    <li class="mb-2">• <strong>Inteligencia emocional:</strong> Daniel Goleman</li>
+                    <li class="mb-2">• <strong>El hombre en busca de sentido:</strong> Viktor Frankl</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">🎯 Técnicas de Afrontamiento</h5>
+                  <ul class="list-unstyled">
+                    <li class="mb-2">• Respiración 4-7-8 para ansiedad</li>
+                    <li class="mb-2">• Técnica de grounding 5-4-3-2-1</li>
+                    <li class="mb-2">• Journaling diario</li>
+                    <li class="mb-2">• Ejercicio físico regular</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">🤝 Comunidades de Apoyo</h5>
+                  <ul class="list-unstyled">
+                    <li class="mb-2">• Grupos de apoyo locales</li>
+                    <li class="mb-2">• Foros en línea de salud mental</li>
+                    <li class="mb-2">• Talleres de mindfulness</li>
+                    <li class="mb-2">• Grupos de terapia grupal</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+      // Load resources on page load
+      async function loadResources() {
+        const token = localStorage.getItem('mk_token');
+        if (!token) {
+          document.getElementById('emergencyResources').innerHTML = '<p>Inicia sesión para ver recursos personalizados</p>';
+          document.getElementById('recommendedResources').innerHTML = '<p>Inicia sesión para ver recomendaciones personalizadas</p>';
+          return;
+        }
+
+        try {
+          const res = await fetch('http://127.0.0.1:8001/api/resources', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            
+            // Render emergency resources
+            const emergencyHTML = data.emergency.map(r => `
+              <div class="mb-3">
+                <h6 class="mb-1">${r.title}</h6>
+                <p class="mb-1 small">${r.description}</p>
+                <p class="mb-0"><strong>Contacto:</strong> <a href="tel:${r.contact}">${r.contact}</a></p>
+              </div>
+            `).join('<hr>');
+            document.getElementById('emergencyResources').innerHTML = emergencyHTML;
+
+            // Render recommended resources
+            const recommendedHTML = data.recommended.map(r => `
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h6 class="card-title">${r.title}</h6>
+                    <p class="card-text small">${r.description}</p>
+                    <span class="badge bg-primary">${r.type}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('');
+            document.getElementById('recommendedResources').innerHTML = recommendedHTML;
+          } else {
+            throw new Error('Error al cargar recursos');
+          }
+        } catch (error) {
+          console.error('Error loading resources:', error);
+          document.getElementById('emergencyResources').innerHTML = '<p class="text-danger">Error al cargar recursos de emergencia</p>';
+          document.getElementById('recommendedResources').innerHTML = '<p class="text-danger">Error al cargar recomendaciones</p>';
+        }
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        TOKEN = localStorage.getItem('mk_token');
+        HANDLE = localStorage.getItem('mk_handle');
+        renderNavAuth();
+        loadResources();
+      });
+    </script>
+  </body>
+</html>

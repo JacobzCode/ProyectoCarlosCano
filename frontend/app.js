@@ -399,6 +399,17 @@ function initDashboard(){
     
     const res = await postJson(API_BASE+'/entries', payload);
     if(res.status===201){
+      // Reset form
+      form.reset();
+      document.getElementById('mood').value = 5;
+      document.getElementById('moodVal').innerText = 5;
+      document.getElementById('actividad_fisica').value = 5;
+      document.getElementById('actFisVal').innerText = 5;
+      document.getElementById('calidad_alimentacion').value = 5;
+      document.getElementById('calAlimVal').innerText = 5;
+      document.getElementById('nivel_socializacion').value = 5;
+      document.getElementById('socVal').innerText = 5;
+      
       // close modal if bootstrap is present
       try{ var modalEl = document.getElementById('surveyModal'); var modal = bootstrap.Modal.getInstance(modalEl); if(modal) modal.hide(); }catch(err){}
       alert('Entry saved'); reloadCharts();

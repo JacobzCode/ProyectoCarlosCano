@@ -13,19 +13,43 @@ except Exception:
 from io import BytesIO
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-ENTRIES = os.path.join(ROOT, 'data', 'entries.csv')
+ENTRIES_CSV = os.path.join(ROOT, 'data', 'entries.csv')
+DB_PATH = os.path.join(ROOT, 'data', 'mood_keeper.db')
 
 
 def _load_entries():
+    """Load entries from SQLite database or fallback to CSV"""
     if not _HAS_PANDAS:
         return None
-    if not os.path.exists(ENTRIES):
+    
+    # Try loading from SQLite first
+    if os.path.exists(DB_PATH):
+        try:
+            import sqlite3
+            conn = sqlite3.connect(DB_PATH)
+            df = pd.read_sql_query("SELECT * FROM entries", conn)
+            conn.close()
+            
+            if 'created' in df.columns:
+                df['created'] = pd.to_datetime(df['created'], errors='coerce')
+            if 'mood' in df.columns:
+                df['mood'] = pd.to_numeric(df['mood'], errors='coerce')
+            
+            return df
+        except Exception as e:
+            print(f"Warning: Could not load from database: {e}")
+            # Fall through to CSV
+    
+    # Fallback to CSV
+    if not os.path.exists(ENTRIES_CSV):
         return pd.DataFrame()
-    df = pd.read_csv(ENTRIES)
+    
+    df = pd.read_csv(ENTRIES_CSV)
     if 'created' in df.columns:
         df['created'] = pd.to_datetime(df['created'], errors='coerce')
     if 'mood' in df.columns:
         df['mood'] = pd.to_numeric(df['mood'], errors='coerce')
+    
     return df
 
 

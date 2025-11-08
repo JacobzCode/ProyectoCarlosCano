@@ -8,188 +8,166 @@
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body id="page-dashboard" data-has-fixed-navbar="true">
-    <div id="dashboardLayout">
-      <!-- Sidebar -->
-      <aside id="sidebar">
-        <div class="p-3 sidebar-header d-flex align-items-center">
-          <div>
-            <div class="navbar-brand">MoodKeeper</div>
-            <div class="small">Monitoreo emocional</div>
+  <body id="page-dashboard">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">MoodKeeper</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link active" href="dashboard.html">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="resources.html">Recursos</a></li>
+            <li class="nav-item"><a class="nav-link" href="profile.html">Perfil</a></li>
+          </ul>
+          <div class="d-flex align-items-center">
+            <span class="text-white me-3">👤 <span id="userHandle">Usuario</span></span>
+            <button id="btnLogout" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
           </div>
         </div>
-        <div class="p-3 text-center">
-          <div class="profile-avatar mb-2" aria-hidden="true"></div>
-          <div id="userHandle" class="fw-bold">-</div>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="container my-4">
+      <!-- Header -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <h2>Dashboard de Estado de Ánimo</h2>
+          <p class="text-muted">Visualiza y registra tu estado emocional</p>
         </div>
-        <nav class="nav flex-column p-2">
-          <a class="nav-link" href="index.html">Inicio</a>
-          <a class="nav-link active" href="dashboard.html">Dashboard</a>
-          <a class="nav-link" href="resources.html">Recursos</a>
-          <a class="nav-link" href="profile.html">Perfil</a>
-          <button id="btnLogout" class="btn btn-outline-secondary m-3">Cerrar sesión</button>
-        </nav>
-      </aside>
+      </div>
 
-      <!-- Main content -->
-      <main id="mainContent" class="w-100">
-        <div class="container-fluid p-4">
-          <div class="row mb-3">
-            <div class="col-12">
-              <div class="d-flex align-items-start justify-content-between">
-                <div>
-                  <h3 class="mb-0">Dashboard</h3>
-                  <p class="text-muted mb-0">Visión general de los estados de ánimo</p>
-                </div>
-                <div class="ms-3">
-                  <button class="btn btn-sm btn-outline-secondary back-btn" onclick="history.back()" aria-label="Volver">← Atrás</button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Botón para crear nueva entrada -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <button class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#surveyModal">
+            ➕ Registrar mi estado de ánimo
+          </button>
+        </div>
+      </div>
 
-          <!-- Chart rows: each chart with its controls on the right -->
-          <div class="row mb-3" id="chartsRow">
-            <!-- Avg chart row -->
-            <div class="col-12 mb-3">
-              <div class="card p-3">
-                <div class="row g-3">
-                  <div class="col-lg-9 col-md-8">
-                    <h6 class="mb-2">Promedio por usuario</h6>
-                    <div class="chart-container">
-                      <canvas id="avgChart" class="chart-large"></canvas>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-md-4 d-flex align-items-center">
-                    <div class="w-100">
-                      <label class="form-label small">Tipo</label>
-                      <select id="chartTypeSelect" class="form-select mb-2">
-                        <option value="bar">Barras</option>
-                        <option value="pie">Circular</option>
-                        <option value="doughnut">Dona</option>
-                        <option value="polarArea">Área polar</option>
-                        <option value="line">Línea</option>
-                        <option value="scatter">Puntos</option>
-                      </select>
-                      <div class="d-grid">
-                        <button id="btnApplyChartType" class="btn btn-primary">Aplicar</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <!-- Gráfico principal -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">📊 Evolución de tu estado de ánimo</h5>
             </div>
-
-            <!-- Hist chart row -->
-            <div class="col-12 mb-3">
-              <div class="card p-3">
-                <div class="row g-3">
-                  <div class="col-lg-9 col-md-8">
-                    <h6 class="mb-2">Distribución</h6>
-                    <div class="chart-container">
-                      <img id="histChartImg" class="img-fluid" src="http://127.0.0.1:8001/api/insights/plot/hist" alt="Distribution" style="max-width: 100%; height: 100%; object-fit: contain;"/>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-md-4 d-flex align-items-center">
-                    <div class="w-100">
-                      <label class="form-label small">Histograma</label>
-                      <select id="histTypeSelect" class="form-select mb-2">
-                        <option value="hist">Histograma</option>
-                        <option value="pie">Circular</option>
-                        <option value="doughnut">Dona</option>
-                        <option value="scatter">Puntos</option>
-                      </select>
-                      <div class="d-grid">
-                        <button id="btnApplyHistType" class="btn btn-outline-secondary">Actualizar histograma</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Alerts / recommendations -->
-          <div id="alertsCard" class="mb-3">
-            <div class="alerts-card-header">
-              <div class="d-flex align-items-center justify-content-between">
-                <div><strong>Alertas & Recomendaciones</strong></div>
-                <div><small class="text-muted">Últimas 24h</small></div>
-              </div>
-            </div>
-            <div class="card p-0">
-              <div class="p-3">
-                <div id="alertsSummary" class="mb-2"></div>
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0" id="alertsTable">
-                    <thead>
-                      <tr>
-                        <th style="width:48px">#</th>
-                        <th>Usuario</th>
-                        <th style="width:120px">Mood</th>
-                        <th style="width:160px">When</th>
-                        <th>Notas</th>
-                        <th style="width:80px">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody id="alertsBody"></tbody>
-                  </table>
-                </div>
-                <div id="recommendations" class="mt-2"></div>
-              </div>
+            <div class="card-body">
+              <canvas id="avgChart" style="max-height: 400px;"></canvas>
             </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      <!-- Tabla de registros recientes -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">📋 Registros Recientes</h5>
+            </div>
+            <div class="card-body">
+              <div id="alertsSummary" class="alert alert-info mb-3">Cargando datos...</div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Mood</th>
+                      <th>Fecha</th>
+                      <th>Comentario</th>
+                    </tr>
+                  </thead>
+                  <tbody id="alertsBody">
+                    <tr>
+                      <td colspan="4" class="text-center text-muted">No hay registros aún</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="recommendations" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Floating action button to open survey modal -->
-    <button id="openSurveyFab" class="btn btn-primary fab" data-bs-toggle="modal" data-bs-target="#surveyModal" title="Publicar estado">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 1 .632.06l2.4 2.4a.5.5 0 0 1 .06.633l-9.193 9.193a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168L12.853.146z"/></svg>
-    </button>
-
-    <!-- Survey Modal -->
-    <div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+    <!-- Modal: Registrar estado de ánimo -->
+    <div class="modal fade" id="surveyModal" tabindex="-1">
+      <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="surveyModalLabel">Publicar estado</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Registrar Estado de Ánimo</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <form id="formSurvey">
-              <div class="mb-3">
-                <label class="form-label">Mood (1-10)</label>
+              <!-- Mood principal -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">¿Cómo te sientes hoy? (1-10)</label>
                 <input id="mood" class="form-range" type="range" min="1" max="10" value="5" oninput="document.getElementById('moodVal').innerText=this.value">
-                <div class="mt-2">Actual: <span id="moodVal">5</span></div>
+                <div class="text-center mt-2">
+                  <span class="badge bg-primary fs-4"><span id="moodVal">5</span> / 10</span>
+                </div>
+                <div class="text-center mt-1">
+                  <small class="text-muted">1 = Muy mal | 10 = Excelente</small>
+                </div>
               </div>
+
+              <!-- Comentario -->
               <div class="mb-3">
-                <textarea id="comment" class="form-control" placeholder="Notas (opcional)"></textarea>
+                <label class="form-label">Comentario (opcional)</label>
+                <textarea id="comment" class="form-control" rows="3" placeholder="Cuéntanos cómo te sientes..."></textarea>
               </div>
-              
-              <!-- Nuevos campos de hábitos -->
-              <div class="mb-3">
-                <label class="form-label">Horas de sueño (opcional)</label>
-                <input id="horas_sueno" class="form-control" type="number" min="0" max="24" step="0.5" placeholder="Ej: 7.5">
+
+              <!-- Sección de hábitos (colapsable) -->
+              <div class="accordion mb-3" id="habitosAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#habitosCollapse">
+                      📊 Hábitos saludables (opcional)
+                    </button>
+                  </h2>
+                  <div id="habitosCollapse" class="accordion-collapse collapse" data-bs-parent="#habitosAccordion">
+                    <div class="accordion-body">
+                      <!-- Horas de sueño -->
+                      <div class="mb-3">
+                        <label class="form-label">💤 Horas de sueño</label>
+                        <input id="horas_sueno" class="form-control" type="number" min="0" max="24" step="0.5" placeholder="Ej: 7.5">
+                      </div>
+
+                      <!-- Actividad física -->
+                      <div class="mb-3">
+                        <label class="form-label">🏃 Actividad física (0-10)</label>
+                        <input id="actividad_fisica" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('actFisVal').innerText=this.value">
+                        <div class="text-center"><small><span id="actFisVal">5</span> / 10</small></div>
+                      </div>
+
+                      <!-- Alimentación -->
+                      <div class="mb-3">
+                        <label class="form-label">🍎 Calidad de alimentación (0-10)</label>
+                        <input id="calidad_alimentacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('calAlimVal').innerText=this.value">
+                        <div class="text-center"><small><span id="calAlimVal">5</span> / 10</small></div>
+                      </div>
+
+                      <!-- Socialización -->
+                      <div class="mb-3">
+                        <label class="form-label">👥 Nivel de socialización (0-10)</label>
+                        <input id="nivel_socializacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('socVal').innerText=this.value">
+                        <div class="text-center"><small><span id="socVal">5</span> / 10</small></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Actividad física (0-10, opcional)</label>
-                <input id="actividad_fisica" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('actFisVal').innerText=this.value">
-                <div class="mt-2"><small>0=Ninguna, 10=Intensa</small> | Actual: <span id="actFisVal">5</span></div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Calidad de alimentación (0-10, opcional)</label>
-                <input id="calidad_alimentacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('calAlimVal').innerText=this.value">
-                <div class="mt-2"><small>0=Muy mala, 10=Excelente</small> | Actual: <span id="calAlimVal">5</span></div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Nivel de socialización (0-10, opcional)</label>
-                <input id="nivel_socializacion" class="form-range" type="range" min="0" max="10" value="5" oninput="document.getElementById('socVal').innerText=this.value">
-                <div class="mt-2"><small>0=Ninguna, 10=Muy social</small> | Actual: <span id="socVal">5</span></div>
-              </div>
-              
-              <div class="text-end">
-                <button class="btn btn-primary" id="btnSubmitSurvey" type="submit">Enviar</button>
+
+              <div class="d-grid">
+                <button class="btn btn-success btn-lg" type="submit">✓ Guardar Registro</button>
               </div>
             </form>
           </div>

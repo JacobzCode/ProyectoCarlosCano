@@ -194,32 +194,76 @@ function paletteForLabels(labels){
 }
 
 function renderAvgChart(data){
-  const labels = Object.keys(data||{}).slice(0,10)
-  const values = labels.map(l=>data[l])
-  // cache
-  avgDataCache.labels = labels.slice()
-  avgDataCache.values = values.slice()
-  // if no data, create placeholder labels
-  if(labels.length===0){
-    for(let i=1;i<=6;i++){ labels.push('User '+i); values.push(null) }
-  }
-  const el = document.getElementById('avgChart'); if(!el) return
+  const el = document.getElementById('avgChart')
+  if(!el) return
+  
   const ctx = el.getContext('2d')
   if(avgChart) avgChart.destroy()
-  const pal = paletteForLabels(labels)
+  
+  const labels = Object.keys(data||{}).slice(0,10)
+  const values = labels.map(l=>data[l])
+  
+  // Si no hay datos, mostrar placeholder
+  if(labels.length === 0){
+    labels.push('Sin datos')
+    values.push(0)
+  }
+  
+  // Guardar en caché
+  avgDataCache.labels = labels.slice()
+  avgDataCache.values = values.slice()
+  
   avgChart = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels,
-      datasets:[{
-        label:'Avg mood',
-        data:values,
-        backgroundColor: pal.bg,
-        borderColor: pal.border,
-        borderWidth: 1
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Promedio de Mood',
+        data: values,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 7
       }]
     },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Mood: ' + context.parsed.y + ' / 10'
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 10,
+          ticks: {
+            stepSize: 1
+          },
+          title: {
+            display: true,
+            text: 'Nivel de Mood (1-10)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Usuario'
+          }
+        }
+      }
+    }
   })
 }
 
@@ -284,44 +328,52 @@ function renderTsChart(ts){
 }
 
 function renderAlerts(obj){
-  const body = document.getElementById('alertsBody'); if(body) body.innerHTML=''
-  const summaryEl = document.getElementById('alertsSummary'); if(summaryEl) summaryEl.innerText = `Alertas: ${obj.count||0}`
-  // helper to color mood
-  const moodColor = (m)=>{ if(m<=3) return 'rgba(220,53,69,0.12)'; if(m<=6) return 'rgba(255,193,7,0.12)'; return 'rgba(25,135,84,0.12)'}
-  const moodBorder = (m)=>{ if(m<=3) return 'rgba(220,53,69,0.9)'; if(m<=6) return 'rgba(255,193,7,0.9)'; return 'rgba(25,135,84,0.9)'}
+  const body = document.getElementById('alertsBody')
+  const summaryEl = document.getElementById('alertsSummary')
+  
+  if(summaryEl){
+    if(obj.count > 0){
+      summaryEl.innerHTML = `<strong>Total de registros:</strong> ${obj.count}`
+      summaryEl.className = 'alert alert-info mb-3'
+    } else {
+      summaryEl.innerHTML = '<strong>No hay registros aún.</strong> ¡Crea tu primer registro de estado de ánimo!'
+      summaryEl.className = 'alert alert-warning mb-3'
+    }
+  }
 
-  if(obj.items && body){
-    obj.items.slice(0,50).forEach((it,idx)=>{
+  if(body){
+    body.innerHTML = ''
+    
+    if(!obj.items || obj.items.length === 0){
+      body.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No hay registros disponibles</td></tr>'
+      return
+    }
+
+    // Mostrar últimos 10 registros
+    obj.items.slice(0, 10).forEach((it)=>{
       const tr = document.createElement('tr')
-      const note = it.comment || ''
-      const preview = note.length>80? note.slice(0,80)+'…' : note
+      const moodClass = it.mood <= 3 ? 'danger' : it.mood <= 6 ? 'warning' : 'success'
+      const comment = it.comment || 'Sin comentario'
+      const commentPreview = comment.length > 50 ? comment.slice(0, 50) + '...' : comment
+      
       tr.innerHTML = `
-        <td>${idx+1}</td>
-        <td>
-          <div class="user-cell">
-            <div class="avatar-sm" aria-hidden="true"></div>
-            <div><div class="fw-semibold">${it.handle}</div><div class="small text-muted">${it.email||''}</div></div>
-          </div>
-        </td>
-        <td><span class="badge-mood" style="background:${moodColor(it.mood)}; border-color:${moodBorder(it.mood)}">${it.mood}</span></td>
-        <td>${it.created}</td>
-        <td><div class="note-preview">${preview}</div></td>
-        <td class="actions-cell text-end"><button class="btn btn-sm btn-outline-secondary" data-idx="${idx}" data-note="${encodeURIComponent(note)}">Ver</button></td>
+        <td><strong>${it.handle}</strong></td>
+        <td><span class="badge bg-${moodClass} fs-6">${it.mood} / 10</span></td>
+        <td><small>${it.created}</small></td>
+        <td>${commentPreview}</td>
       `
       body.appendChild(tr)
-    })
-    // attach view handlers
-    body.querySelectorAll('.actions-cell button').forEach(b=>{
-      b.addEventListener('click', (e)=>{
-        const note = decodeURIComponent(b.getAttribute('data-note')||'')
-        showAlertNoteModal(note)
-      })
     })
   }
 
   const rec = document.getElementById('recommendations')
   if(rec){
-    if((obj.count||0) > 0){ rec.innerHTML = `<div class="alert alert-warning">Se encontraron ${obj.count} respuestas con bajo estado de ánimo. Mostrar recursos y contactos locales.</div>` } else { rec.innerHTML = `<div class="alert alert-success">No se encontraron alertas recientes.</div>` }
+    const alertCount = obj.items ? obj.items.filter(i => i.mood <= 3).length : 0
+    if(alertCount > 0){
+      rec.innerHTML = `<div class="alert alert-danger">⚠️ <strong>Atención:</strong> Se encontraron ${alertCount} registros con estado de ánimo bajo. <a href="resources.html" class="alert-link">Ver recursos de apoyo</a></div>`
+    } else {
+      rec.innerHTML = `<div class="alert alert-success">✓ No se detectaron alertas recientes. ¡Sigue así!</div>`
+    }
   }
 }
 
@@ -418,82 +470,96 @@ function showConfirmModal(title, message, onOk){
 
 
 function initDashboard(){
-  // restore token (optional)
-  if(localStorage.getItem('mk_token')){ TOKEN=localStorage.getItem('mk_token'); HANDLE=localStorage.getItem('mk_handle'); const uh = document.getElementById('userHandle'); if(uh) uh.innerText = HANDLE }
-  // ensure navbar auth area reflects current session
-  try{ renderNavAuth() }catch(e){}
-  // logout
-  const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', async ()=>{ if(!TOKEN) return; await fetch(API_BASE+'/sessions/logout', {method:'POST', headers:{'Authorization':'Bearer '+TOKEN}}); TOKEN=null; HANDLE=null; localStorage.removeItem('mk_token'); localStorage.removeItem('mk_handle'); window.location='index.html' })
+  // Restaurar token y usuario
+  if(localStorage.getItem('mk_token')){
+    TOKEN = localStorage.getItem('mk_token')
+    HANDLE = localStorage.getItem('mk_handle')
+    const uh = document.getElementById('userHandle')
+    if(uh) uh.innerText = HANDLE || 'Usuario'
+  }
 
-  // form submit handler (modal will open the form)
-  const form = document.getElementById('formSurvey');
-  if(form) form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const mood = parseInt(document.getElementById('mood').value);
-    const comment = document.getElementById('comment').value;
-    
-    // Capturar nuevos campos de hábitos
-    const horas_sueno_val = document.getElementById('horas_sueno').value;
-    const horas_sueno = horas_sueno_val ? parseFloat(horas_sueno_val) : null;
-    const actividad_fisica = parseInt(document.getElementById('actividad_fisica').value);
-    const calidad_alimentacion = parseInt(document.getElementById('calidad_alimentacion').value);
-    const nivel_socializacion = parseInt(document.getElementById('nivel_socializacion').value);
-    
-    const payload = {
-      mood, 
-      comment,
-      horas_sueno,
-      actividad_fisica,
-      calidad_alimentacion,
-      nivel_socializacion
-    };
-    
-    const res = await postJson(API_BASE+'/entries', payload);
-    if(res.status===201){
-      // Reset form
-      form.reset();
-      document.getElementById('mood').value = 5;
-      document.getElementById('moodVal').innerText = 5;
-      document.getElementById('actividad_fisica').value = 5;
-      document.getElementById('actFisVal').innerText = 5;
-      document.getElementById('calidad_alimentacion').value = 5;
-      document.getElementById('calAlimVal').innerText = 5;
-      document.getElementById('nivel_socializacion').value = 5;
-      document.getElementById('socVal').innerText = 5;
-      
-      // close modal if bootstrap is present
-      try{ var modalEl = document.getElementById('surveyModal'); var modal = bootstrap.Modal.getInstance(modalEl); if(modal) modal.hide(); }catch(err){}
-      alert('Entry saved'); reloadCharts();
-    } else {
-      try{ const j=await res.json(); alert('Error: '+(j.detail||JSON.stringify(j))) }catch(err){ alert('Error submitting') }
-    }
-  })
-
-  // CSV download removed per UX decision
-
-  // chart style controls
-  const chartSelect = document.getElementById('chartTypeSelect')
-  const chartBtn = document.getElementById('btnApplyChartType')
-  if(chartBtn && chartSelect) chartBtn.addEventListener('click', ()=>{ const t = chartSelect.value; applyAvgChartType(t) })
-
-  // histogram type controls
-  const histSelect = document.getElementById('histTypeSelect')
-  const histBtn = document.getElementById('btnApplyHistType')
-  if(histBtn && histSelect){
-    histBtn.addEventListener('click', ()=>{
-      const t = histSelect.value
-      const histImg = document.getElementById('histChartImg')
-      if(!histImg) return
-      const base = 'http://127.0.0.1:8001/api/insights/plot/hist'
-      const params = new URLSearchParams()
-      if(t) params.set('type', t)
-      params.set('t', Date.now())
-      const src = base + '?' + params.toString()
-      histImg.setAttribute('src', src)
+  // Logout
+  const btnLogout = document.getElementById('btnLogout')
+  if(btnLogout){
+    btnLogout.addEventListener('click', async ()=>{
+      if(!TOKEN) return
+      try{
+        await fetch(API_BASE+'/sessions/logout', {
+          method: 'POST',
+          headers: {'Authorization': 'Bearer '+TOKEN}
+        })
+      }catch(e){}
+      TOKEN = null
+      HANDLE = null
+      localStorage.removeItem('mk_token')
+      localStorage.removeItem('mk_handle')
+      window.location.replace('index.html')
     })
   }
 
-  // initial data load
+  // Form submit handler
+  const form = document.getElementById('formSurvey')
+  if(form){
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault()
+      
+      const mood = parseInt(document.getElementById('mood').value)
+      const comment = document.getElementById('comment').value.trim()
+      
+      // Capturar campos de hábitos (opcionales)
+      const horas_sueno_val = document.getElementById('horas_sueno').value
+      const horas_sueno = horas_sueno_val ? parseFloat(horas_sueno_val) : null
+      const actividad_fisica = parseInt(document.getElementById('actividad_fisica').value)
+      const calidad_alimentacion = parseInt(document.getElementById('calidad_alimentacion').value)
+      const nivel_socializacion = parseInt(document.getElementById('nivel_socializacion').value)
+      
+      const payload = {
+        mood,
+        comment: comment || null,
+        horas_sueno,
+        actividad_fisica,
+        calidad_alimentacion,
+        nivel_socializacion
+      }
+      
+      try{
+        const res = await postJson(API_BASE+'/entries', payload)
+        
+        if(res.status === 201){
+          // Cerrar modal
+          try{
+            const modalEl = document.getElementById('surveyModal')
+            const modal = bootstrap.Modal.getInstance(modalEl)
+            if(modal) modal.hide()
+          }catch(err){}
+          
+          // Reset form
+          form.reset()
+          document.getElementById('mood').value = 5
+          document.getElementById('moodVal').innerText = 5
+          document.getElementById('actividad_fisica').value = 5
+          document.getElementById('actFisVal').innerText = 5
+          document.getElementById('calidad_alimentacion').value = 5
+          document.getElementById('calAlimVal').innerText = 5
+          document.getElementById('nivel_socializacion').value = 5
+          document.getElementById('socVal').innerText = 5
+          
+          alert('✅ Registro guardado exitosamente')
+          
+          // Recargar datos
+          loadDashboard()
+        } else {
+          const j = await res.json()
+          alert('❌ Error: ' + (j.detail || 'No se pudo guardar'))
+        }
+      }catch(err){
+        console.error('Error al guardar:', err)
+        alert('❌ Error de conexión')
+      }
+    })
+  }
+
+  // Cargar datos iniciales
   loadDashboard()
 }
 
